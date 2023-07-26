@@ -17,31 +17,31 @@ typedef enum log_grade{
 struct _log{
     bool log_s[5];
     template<typename S, typename ...Args>
-    void debug(S &&str, Args&& ...args){
+    void debug(S &str, Args&& ...args){
         if(!log_s[0]) return;
         std::printf("*DEBUG*: ");
         std::printf(str, std::forward<Args>(args)...);
     }
     template<typename S, typename ...Args>
-    void info(S str, Args&& ...args){
+    void info(S &str, Args&& ...args){
         if(!log_s[1]) return;
         std::printf("*INFO*: ");
         std::printf(str, std::forward<Args>(args)...);
     }
     template<typename S, typename ...Args>
-    void warn(S str, Args&& ...args){
+    void warn(S &str, Args&& ...args){
         if(!log_s[2]) return;
         std::printf("*WARN*: ");
         std::printf(str, std::forward<Args>(args)...);
     }
     template<typename S, typename ...Args>
-    void error(S str, Args&& ...args){
+    void error(S &str, Args&& ...args){
         if(!log_s[3]) return;
         std::printf("*ERROR: ");
         std::printf(str, std::forward<Args>(args)...);
     }
     template<typename S, typename ...Args>
-    void fatal(S str, Args&& ...args){
+    void fatal(S &str, Args&& ...args){
         if(!log_s[4]) return;
         std::printf("*FATAL: ");
         std::printf(str, std::forward<Args>(args)...);

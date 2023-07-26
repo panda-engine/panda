@@ -3,9 +3,6 @@
 #include <cstdarg>
 #include <cassert>
 
-#include <fmt/core.h>
-#include <vadefs.h>
-
 struct _log panda_log;
 struct _log_c panda_log_c;
 static bool init_ok = false;
