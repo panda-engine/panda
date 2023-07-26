@@ -1,11 +1,13 @@
 
 add_requires("quickjs")
 
-add_includedirs("./inc")
+--add_includedirs("./inc")
 
 target("jsc")
+    add_deps("log")
     set_kind("static")
-    add_files("./jsc.c", "./cutils.c")
+    add_files("./*.cpp", "./cutils.c")
+    set_languages("cxx20")
     if is_plat("linux") then 
         add_packages("quickjs")
     elseif is_plat("windows") then 
@@ -24,6 +26,6 @@ target("test_jsc")
         add_packages("quickjs")
     end
     after_build(function (target)
-        os.cp("$(projectdir)/src/js/jscore/hello.js", target:targetdir())
+        os.cp("$(projectdir)/src/js/jscore/*.js", target:targetdir())
     end)
 
