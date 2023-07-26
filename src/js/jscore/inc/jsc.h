@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 
-JSContext *panda_jsc_new_ctx(JSRuntime *rt);
+//JSContext *panda_jsc_new_ctx(JSRuntime *rt);
 
 typedef struct {
     char *name;
