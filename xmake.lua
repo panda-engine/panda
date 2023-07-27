@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_includedirs("src/log/inc", "src/js/jscore/inc", "src/malloc/inc")
+add_includedirs("src/log/inc", "src/js/jscore/inc")
 
 includes("src/log/**xmake.lua", "src/js/**xmake.lua")
 
