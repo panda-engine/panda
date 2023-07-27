@@ -1,5 +1,6 @@
 
 #include "jsc.h"
+#include "log.h"
 
 #include <string.h>
 
@@ -10,6 +11,9 @@ void namelist_add(namelist_t *lp, const char *name, const char *short_name, int 
         size_t newsize = lp->size + (lp->size >> 1) + 4;
         namelist_entry_t *a = 
                     (namelist_entry_t *)realloc(lp->array, sizeof(lp->array[0]) * newsize);
+        if(!a) {
+
+        }
         lp->array = a;
         lp->size = newsize;
     }
@@ -19,7 +23,7 @@ void namelist_add(namelist_t *lp, const char *name, const char *short_name, int 
         e->short_name = _strdup(short_name);
     }
     else {
-        e->short_name = NULL;
+        e->short_name = nullptr;
     }
     e->flags = flags;
 }
@@ -32,7 +36,7 @@ void namelist_free(namelist_t *lp) {
         free(e->short_name);
     }
     free(lp->array);
-    lp->array = NULL;
+    lp->array = nullptr;
     lp->size = 0;
 }
 
@@ -42,7 +46,7 @@ namelist_entry_t *namelist_find(namelist_t *lp, const char *name) {
         namelist_entry_t *e = &lp->array[i];
         if (!strcmp(e->name, name)) return e;
     }
-    return NULL;
+    return nullptr;
 }
 
 void namelist_init_add_cmoudule(namelist_t * n) {

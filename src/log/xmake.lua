@@ -2,7 +2,7 @@
 
 target("log")
     set_kind("static")
-    add_files("./*.cpp")
+    add_files("./log.cpp")
     set_languages("cxx17")
 
 target("test_log")

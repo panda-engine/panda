@@ -4,12 +4,13 @@
 #include <cstring>
 
 static int js_module_dummy_init(JSContext *ctx, JSModuleDef *m) {
-    /* should never be called when compiling JS code */
-    abort();
+    log_error("should never be called when compiling JS code", 0);
+    return -1;
 }
 
 static JSModuleDef *jsc_module_loader(JSContext *ctx,
                               const char *module_name, void *opaque) {
+    log_debug("jsc_module_loader modulename:{%s}", module_name);
     JSModuleDef *m;
     namelist_entry_t *e;
     panda_js_obj * jsc_o = (panda_js_obj *)opaque;
@@ -22,7 +23,7 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx,
         /* create a dummy module */
         m = pjsc(JS_NewCModule)(ctx, module_name, js_module_dummy_init);
     } else if (has_suffix(module_name, ".so") || has_suffix(module_name, ".dll")) {
-        panda_log.warn("Warning: binary module '%s' will be dynamically loaded\n", module_name);
+        log_warn("binary module will be dynamically loaded", 0);
         /* create a dummy module */
         m = pjsc(JS_NewCModule)(ctx, module_name, js_module_dummy_init);
         /* the resulting executable will export its symbols for the
@@ -43,9 +44,8 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx,
             free(module_name_buf);
         }
         if (!buf) {
-            pjsc(JS_ThrowReferenceError)(ctx, "could not load module filename '%s'",
-                                   module_name);
-            return NULL;
+            log_error("could not load module filename '%s'", module_name);
+            return nullptr;
         }
         
         /* compile the module */
@@ -54,12 +54,12 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx,
         pjsc(js_free)(ctx, buf);
 
         if (JS_IsException(func_val)) {
-            panda_log.error("Eval error: %s\\%d\n%s",__FILE__, __LINE__, __func__);
-            pjsc(js_free)(ctx, buf);
-            JS_FreeValue(ctx, func_val);
-            return NULL;
-        }
-        while (jsc_o->next != NULL) {
+            log_error("eval error", 0);
+            pjsc(js_std_dump_error)(ctx);
+            return nullptr;
+        } 
+
+        while (jsc_o->next != nullptr) {
             jsc_o = jsc_o->next;
         }
         jsc_o->next = panda_new_js_obj();
@@ -72,6 +72,7 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx,
 }
 
 static void compile_file(JSContext *ctx, panda_js_obj *jsc_o, const char *filename) {
+    log_debug("complie_file_toobj", 0);
     uint8_t *buf;
     int eval_flags;
     JSValue obj;
@@ -79,8 +80,8 @@ static void compile_file(JSContext *ctx, panda_js_obj *jsc_o, const char *filena
     
     buf = pjsc(js_load_file)(ctx, &buf_len, filename);
     if (!buf) {
-        panda_log.error("Could not load file: %s\n", filename);
-        exit(1);
+        log_error("Could not load '%s'\n", filename);
+        return;
     }
     eval_flags = JS_EVAL_FLAG_COMPILE_ONLY;
     int module = pjsc(JS_DetectModule)((const char *)buf, buf_len);
@@ -89,38 +90,40 @@ static void compile_file(JSContext *ctx, panda_js_obj *jsc_o, const char *filena
     else        eval_flags |= JS_EVAL_TYPE_GLOBAL;
 
     obj = pjsc(JS_Eval)(ctx, (const char *)buf, buf_len, filename, eval_flags);
+    pjsc(js_free)(ctx, buf);
+
     if (JS_IsException(obj)) {
-        panda_log.error("Can not eval %s to obj (JS_IsExcption)\n", filename);
+        log_error("eval error", 0);
         pjsc(js_std_dump_error)(ctx);
-        exit(1);
+        return;
     }
 
     jsc_o->obj = obj;
-
-    pjsc(js_free)(ctx, buf);
 }
 
 panda_js_obj *panda_new_js_obj(){
+    log_debug("panda_new_js_obj", 0);
     panda_js_obj *r = (panda_js_obj *)malloc(sizeof(panda_js_obj));
     if(!r){
-        panda_log.error("Can not alloc panda_js_obj");
-        exit(1);
+        log_error("Cannot apply for memory", 0);
+        return nullptr;
     }
     r->byte_swap = FALSE;
     r->cmodule_list = (namelist_t *)malloc(sizeof(namelist_t));
-    r->cmodule_list->array = NULL;
+    r->cmodule_list->array = nullptr;
     r->cmodule_list->count = 0;
     r->cmodule_list->size = 0;
     r->init_module_list = (namelist_t *)malloc(sizeof(namelist_t));
-    r->init_module_list->array = NULL;
+    r->init_module_list->array = nullptr;
     r->init_module_list->count = 0;
     r->init_module_list->size = 0;
-    r->next = NULL;
+    r->next = nullptr;
     return r;
 }
 
 void panda_free_js_obj(JSContext *ctx, panda_js_obj *ptr){
-    if(ptr == NULL) return;
+    log_debug("panda_free_js_obj", 0);
+    if(ptr == nullptr) return;
     namelist_free(ptr->cmodule_list);
     namelist_free(ptr->init_module_list);
     free(ptr->cmodule_list);
@@ -130,10 +133,15 @@ void panda_free_js_obj(JSContext *ctx, panda_js_obj *ptr){
 }
 
 panda_js_obj *panda_js_toObj(JSRuntime *rt, JSContext *ctx, const char *filename) {
+    log_debug("panda_js_toObj filename: {%d}", filename);
     panda_js_obj *jsc_o = panda_new_js_obj();
 
+    if(!jsc_o) {
+        return nullptr;
+    }
+
     namelist_init_add_cmoudule(jsc_o->cmodule_list);
-    pjsc(JS_SetModuleLoaderFunc)(rt, NULL, jsc_module_loader, jsc_o);
+    pjsc(JS_SetModuleLoaderFunc)(rt, nullptr, jsc_module_loader, jsc_o);
     compile_file(ctx, jsc_o, filename);
 
     return jsc_o;

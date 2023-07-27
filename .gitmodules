@@ -1,0 +1,3 @@
+[submodule "src/forge"]
+	path = src/forge
+	url = https://github.com/panda-engine/The-Forge-fork

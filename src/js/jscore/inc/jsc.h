@@ -16,7 +16,7 @@ extern "C" {
 #define pjsc(fun) fun
 #endif
 
-//JSContext *panda_jsc_new_ctx(JSRuntime *rt);
+JSRuntime *panda_jsc_new_rt();
 
 typedef struct {
     char *name;
