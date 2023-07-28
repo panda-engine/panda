@@ -61,11 +61,11 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx, const char *module_name, v
             buf = pjsc(js_load_file)(ctx, &buf_len, module_name);
         } else {
             size_t len = strlen(module_name);
-            char *module_name_buf = (char *)malloc(len + 4);
+            char *module_name_buf = (char *)pjsc(js_malloc)(ctx, len + 4);
             memcpy(module_name_buf, module_name, len);
             snprintf(module_name_buf, len + 4, "%s.js", module_name);
             buf = pjsc(js_load_file)(ctx, &buf_len, module_name_buf);
-            free(module_name_buf);
+            pjsc(js_free)(ctx, module_name_buf);
         }
         if (!buf) {
             log_error("could not load module filename '%s'", module_name);
@@ -86,7 +86,7 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx, const char *module_name, v
         while (jsc_b->next != nullptr) {
             jsc_b = jsc_b->next;
         }
-        jsc_b->next = panda_new_js_bc();
+        jsc_b->next = panda_new_js_bc(ctx);
         to_bytecode(ctx, func_val, jsc_b->next, TRUE);
         
         /* the module is already referenced, so we must free it */
@@ -127,9 +127,9 @@ static void compile_file(JSContext *ctx, panda_js_bc *jsc_b, const char *filenam
     JS_FreeValue(ctx, obj);
 }
 
-panda_js_bc *panda_new_js_bc(){
+panda_js_bc *panda_new_js_bc(JSContext *ctx){
     log_debug("panda_new_js_bc", 0);
-    panda_js_bc *r = (panda_js_bc *)malloc(sizeof(panda_js_bc));
+    panda_js_bc *r = (panda_js_bc *)pjsc(js_malloc)(ctx, sizeof(panda_js_bc));
     if(!r){
         log_error("Cannot apply for memory", 0);
         return nullptr;
@@ -137,11 +137,11 @@ panda_js_bc *panda_new_js_bc(){
     r->byte_swap = FALSE;
     r->bytecode = nullptr;
     r->bytecode_len = 0;
-    r->cmodule_list = (namelist_t *)malloc(sizeof(namelist_t));
+    r->cmodule_list = (namelist_t *)pjsc(js_malloc)(ctx, sizeof(namelist_t));
     r->cmodule_list->array = nullptr;
     r->cmodule_list->count = 0;
     r->cmodule_list->size = 0;
-    r->init_module_list = (namelist_t *)malloc(sizeof(namelist_t));
+    r->init_module_list = (namelist_t *)pjsc(js_malloc)(ctx, sizeof(namelist_t));
     r->init_module_list->array = nullptr;
     r->init_module_list->count = 0;
     r->init_module_list->size = 0;
@@ -154,16 +154,16 @@ void panda_free_js_bc(JSContext *ctx, panda_js_bc *ptr){
     if(ptr == nullptr) return;
     namelist_free(ptr->cmodule_list);
     namelist_free(ptr->init_module_list);
-    free(ptr->cmodule_list);
-    free(ptr->init_module_list);
+    pjsc(js_free)(ctx, ptr->cmodule_list);
+    pjsc(js_free)(ctx, ptr->init_module_list);
     pjsc(js_free)(ctx, ptr->bytecode);
     panda_free_js_bc(ctx, ptr->next);
-    free(ptr);
+    pjsc(js_free)(ctx, ptr);
 }
 
 panda_js_bc *panda_js_toBytecode(JSRuntime *rt, JSContext *ctx, const char *filename) {
     log_debug("panda_js_toBytecode filename: {%d}", filename);
-    panda_js_bc *jsc_b = panda_new_js_bc();
+    panda_js_bc *jsc_b = panda_new_js_bc(ctx);
 
     if(!jsc_b) {
         return nullptr;

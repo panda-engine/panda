@@ -1,72 +1,84 @@
 
 #include "jsc.h"
 #include "log.h"
-//#include "p_malloc.h"
-#include <corecrt_malloc.h>
-#include <stddef.h>
 
 
-// static void *pjs_def_malloc(JSMallocState *s, size_t size){
-//     size_t ptr;
-//     /* Do not allocate zero bytes: behavior is platform dependent */
-//     assert(size != 0);
-//     ptr = p_malloc_malloc((struct p_malloc* )s->opaque, size);
-//     if (ptr == PANDA_MALLOC_ALLOCATE_FAILED) {
-//         log_error("pjs_def_malloc: p_malloc_malloc alloc size{%d}", size);
-//         return nullptr;
-//     }
-//     return (void *)ptr;
-// }
+#if defined(__APPLE__)
+#define MALLOC_OVERHEAD  0
+#else
+#define MALLOC_OVERHEAD  8
+#endif
 
-// static void pjs_def_free(JSMallocState *s, void *ptr){
-//     size_t p = (size_t)ptr;
-//     if (p == PANDA_MALLOC_ALLOCATE_FAILED) {
-//         log_error("pjs_def_free: ptr is nullptr");
-//         return;
-//     }
-//     p_malloc_free((struct p_malloc* )s->opaque, p);
-// }
+static void *pjs_def_malloc(JSMallocState *s, size_t size){
+    void *ptr;
+
+    if (size == 0 or unlikely(s->malloc_size + size > s->malloc_limit))
+        return nullptr;
+
+    pmem *pm = (pmem *)s->opaque;
+    ptr = pm->alloc(size);
+    if (!ptr)
+        return nullptr;
+
+    s->malloc_count++;
+    s->malloc_size += pm->usable_size(ptr) + MALLOC_OVERHEAD;
+    return ptr;
+}
+
+static void pjs_def_free(JSMallocState *s, void *ptr){
+    if (!ptr)
+        return;
+    pmem *pm = (pmem *)s->opaque;
+    s->malloc_count--;
+    s->malloc_size -= pm->usable_size(ptr) + MALLOC_OVERHEAD;
+    pm->free(ptr);
+}
+
+static void *pjs_def_realloc(JSMallocState *s, void *ptr, size_t size){
+    size_t old_size;
+
+    if (!ptr) {
+        if (size == 0)
+            return nullptr;
+        return pjs_def_malloc(s, size);
+    }
+    pmem *pm = (pmem *)s->opaque;
+    old_size = pm->usable_size(ptr);
+    if (size == 0) {
+        s->malloc_count--;
+        s->malloc_size -= old_size + MALLOC_OVERHEAD;
+        pm->free(ptr);
+        return nullptr;
+    }
+    if (s->malloc_size + size - old_size > s->malloc_limit)
+        return nullptr;
+
+    ptr = pm->realloc(ptr, size);
+    if (!ptr)
+        return nullptr;
+
+    s->malloc_size += pm->usable_size(ptr) - old_size;
+    return ptr;
+}
 
 
-// static void *pjs_def_realloc(JSMallocState *s, void *ptr, size_t size) {
-//     size_t p = (size_t)ptr;
-//     size_t old_size = p_malloc_usable_size((struct p_malloc* )s->opaque, p);
+static const JSMallocFunctions def_malloc_funcs = {
+    pjs_def_malloc,
+    pjs_def_free,
+    pjs_def_realloc,
+    nullptr,
+};
 
-//     //assert(size != 0);
+JSRuntime *panda_jsc_new_rt(pmem *alloc){
+    JSRuntime *p = pjsc(JS_NewRuntime2)(&def_malloc_funcs, alloc);
+    pjsc(js_std_init_handlers)(p);
+    return p;
+}
 
-//     if (p == PANDA_MALLOC_ALLOCATE_FAILED) {
-//         if (size == 0) {
-//             log_warn("ojs_def_realloc: size = 0!");
-//             return nullptr;
-//         }
-//         return pjs_def_malloc(s, size);
-//     }
-
-//     if (size == 0) {
-//         p_malloc_free((struct p_malloc* )s->opaque, p);
-//         return nullptr;
-//     }
-
-//     size_t new_p = p_malloc_malloc((struct p_malloc* )s->opaque, size);
-//     ptr = realloc(ptr, size);
-//     if (!ptr)
-//         return nullptr;
-
-
-//     return ptr;
-// }
-
-
-// static const JSMallocFunctions def_malloc_funcs = {
-//     pjs_def_malloc,
-//     pjs_def_free,
-//     pjs_realloc,
-//     nullptr
-// };
-
-// JSRuntime *panda_jsc_new_rt(){
-//     pjsc(JS_NewRuntime2)()
-// }
+void panda_jsc_free_rt(JSRuntime *p){
+    pjsc(js_std_free_handlers)(p);
+    pjsc(JS_FreeRuntime)(p);
+}
 
 static void run_obj(JSContext *ctx, JSValue obj, int load_only){
     log_debug("run_obj: obj_tag{%d} load_only{%d}", obj.tag, load_only);
@@ -94,8 +106,8 @@ static void run_obj(JSContext *ctx, JSValue obj, int load_only){
 }
 
 
-panda_js *panda_new_js(JSRuntime *rt, panda_js_type type){
-    panda_js *r = (panda_js *)malloc(sizeof(panda_js));
+panda_js *panda_new_js(JSRuntime *rt, panda_js_t type){
+    panda_js *r = (panda_js *)mi_malloc(sizeof(panda_js));
 
     if (!r) {
         log_error("Cannot apply for memory", 0);
@@ -104,7 +116,7 @@ panda_js *panda_new_js(JSRuntime *rt, panda_js_type type){
 
     r->ctx = pjsc(JS_NewContextRaw)(rt);
     if (!r->ctx){
-        free(r);
+        mi_free(r);
         log_error("Can not alloc new ctx",0);
         return nullptr;
     }
@@ -131,10 +143,10 @@ void panda_free_js(panda_js *pjs) {
         panda_free_js_obj(pjs->ctx, (panda_js_obj *)pjs->ptr);
     }
     pjsc(JS_FreeContext)(pjs->ctx);
-    free(pjs);
+    mi_free(pjs);
 }
 
-panda_js *panda_js_to(JSRuntime *rt, const char *filename, panda_js_type type){
+panda_js *panda_js_to(JSRuntime *rt, const char *filename, panda_js_t type){
     log_debug("panda_{%s}_to_{%d}", filename, type);
     panda_js *pjs = panda_new_js(rt, type);
 

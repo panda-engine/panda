@@ -10,8 +10,8 @@ typedef enum log_grade{
     off,
 }log_grade;
 
+#include <stdio.h>
 #ifdef __cplusplus
-#include <cstdio>
 #include <utility>
 #include <atomic>
 
@@ -47,7 +47,7 @@ constexpr inline void log_error(const S &str, Args&& ...args){
 }
 template<typename S, typename ...Args>
 constexpr inline void log(bool is_error, const S &str, Args&& ...args){
-    if(!log_s[3].load(std::memory_order_acquire) && !is_error) return;
+    if(!log_s[3].load(std::memory_order_acquire) and !is_error) return;
     std::printf("* ERROR: ");
     std::printf(str, std::forward<Args>(args)...);
     std::puts(" *");
@@ -57,10 +57,18 @@ extern "C" {
 #endif
 void set_log(log_grade g);
 
+
 #ifdef NDEBUG
+#define clog_error(msg, args...) ((void)0)
 #define assert(x) ((void)0)
 #else
 #include <assert.h>
+
+#define clog_error(msg, ...) \
+        printf("* ERROR: ");\
+        printf(msg, __VA_ARGS__);\
+        puts(" *");\
+
 #endif
 
 #ifdef __cplusplus

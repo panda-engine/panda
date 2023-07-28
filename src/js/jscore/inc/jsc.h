@@ -3,20 +3,45 @@
 #define jsc_h_
 
 #ifdef __cplusplus
-extern "C" {
-#endif
-#include "cutils.h"
-#include "quickjs-libc.h"
-
 
 #ifdef _MSC_VER
 #include "win_def.h"
-#define pjsc(fun) WIN_##fun
+#define pjsc(fun) WIN_##fun.load(std::memory_order_acquire)
 #else
 #define pjsc(fun) fun
 #endif
 
-JSRuntime *panda_jsc_new_rt();
+static inline void JS_FreeValue(JSContext *ctx, JSValue v){
+    if (JS_VALUE_HAS_REF_COUNT(v)) {
+        JSRefCountHeader *p = (JSRefCountHeader *)JS_VALUE_GET_PTR(v);
+        if (--p->ref_count <= 0) {
+            pjsc(__JS_FreeValue)(ctx, v);
+        }
+    }
+}
+
+static inline void JS_FreeValueRT(JSRuntime *rt, JSValue v){
+    if (JS_VALUE_HAS_REF_COUNT(v)) {
+        JSRefCountHeader *p = (JSRefCountHeader *)JS_VALUE_GET_PTR(v);
+        if (--p->ref_count <= 0) {
+            pjsc(__JS_FreeValueRT)(rt, v);
+        }
+    }
+}
+
+extern "C" {
+#endif
+
+#include "cutils.h"
+#include "quickjs-libc.h"
+
+#include "pmalloc.h"
+
+extern void win_jsc_fn_init(const char* const path);
+extern int win_jsc_fn_free();
+
+JSRuntime *panda_jsc_new_rt(pmem *alloc);
+void panda_jsc_free_rt(JSRuntime *p);
 
 typedef struct {
     char *name;
@@ -45,7 +70,7 @@ typedef struct panda_js_bc{
     struct panda_js_bc *next;
 }panda_js_bc;
 
-panda_js_bc *panda_new_js_bc();
+panda_js_bc *panda_new_js_bc(JSContext *ctx);
 void panda_free_js_bc(JSContext *ctx, panda_js_bc *ptr);
 
 panda_js_bc *panda_js_toBytecode(JSRuntime *rt, JSContext *ctx, const char *filename);
@@ -58,7 +83,7 @@ typedef struct panda_js_obj{
     struct panda_js_obj *next;
 }panda_js_obj;
 
-panda_js_obj *panda_new_js_obj();
+panda_js_obj *panda_new_js_obj(JSContext *ctx);
 void panda_free_js_obj(JSContext *ctx, panda_js_obj *ptr);
 
 panda_js_obj *panda_js_toObj(JSRuntime *rt, JSContext *ctx, const char *filename);
@@ -66,10 +91,10 @@ panda_js_obj *panda_js_toObj(JSRuntime *rt, JSContext *ctx, const char *filename
 typedef enum {
     bytecode,
     obj,
-}panda_js_type;
+}panda_js_t;
 
 typedef struct panda_js{
-    panda_js_type type;
+    panda_js_t type;
     void *ptr;
     JSContext *ctx;
 }panda_js;
@@ -77,7 +102,7 @@ typedef struct panda_js{
 panda_js *panda_new_js();
 void panda_free_js(panda_js *pjs);
 
-panda_js *panda_js_to(JSRuntime *rt, const char *filename, panda_js_type type);
+panda_js *panda_js_to(JSRuntime *rt, const char *filename, panda_js_t type);
 
 void panda_js_run(panda_js *pjs);
 

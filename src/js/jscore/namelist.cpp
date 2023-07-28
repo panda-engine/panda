@@ -2,7 +2,7 @@
 #include "jsc.h"
 #include "log.h"
 
-#include <string.h>
+#include <pmalloc.h>
 
 void namelist_add(namelist_t *lp, const char *name, const char *short_name, int flags) {
 
@@ -10,7 +10,7 @@ void namelist_add(namelist_t *lp, const char *name, const char *short_name, int 
     if (lp->count == lp->size) {
         size_t newsize = lp->size + (lp->size >> 1) + 4;
         namelist_entry_t *a = 
-                    (namelist_entry_t *)realloc(lp->array, sizeof(lp->array[0]) * newsize);
+                    (namelist_entry_t *)mi_realloc(lp->array, sizeof(lp->array[0]) * newsize);
         if(!a) {
 
         }
@@ -18,9 +18,9 @@ void namelist_add(namelist_t *lp, const char *name, const char *short_name, int 
         lp->size = newsize;
     }
     e =  &lp->array[lp->count++];
-    e->name = _strdup(name);
+    e->name = mi_strdup(name);
     if (short_name) {
-        e->short_name = _strdup(short_name);
+        e->short_name = mi_strdup(short_name);
     }
     else {
         e->short_name = nullptr;
@@ -32,10 +32,10 @@ void namelist_free(namelist_t *lp) {
 
     while (lp->count > 0) {
         namelist_entry_t *e = &lp->array[--lp->count];
-        free(e->name);
-        free(e->short_name);
+        mi_free(e->name);
+        mi_free(e->short_name);
     }
-    free(lp->array);
+    mi_free(lp->array);
     lp->array = nullptr;
     lp->size = 0;
 }

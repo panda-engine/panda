@@ -37,11 +37,11 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx,
             buf = pjsc(js_load_file)(ctx, &buf_len, module_name);
         } else {
             size_t len = strlen(module_name);
-            char *module_name_buf = (char *)malloc(len + 4);
+            char *module_name_buf = (char *)pjsc(js_malloc)(ctx, len + 4);
             memcpy(module_name_buf, module_name, len);
             snprintf(module_name_buf, len + 4, "%s.js", module_name);
             buf = pjsc(js_load_file)(ctx, &buf_len, module_name_buf);
-            free(module_name_buf);
+            pjsc(js_free)(ctx, module_name_buf);
         }
         if (!buf) {
             log_error("could not load module filename '%s'", module_name);
@@ -62,7 +62,7 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx,
         while (jsc_o->next != nullptr) {
             jsc_o = jsc_o->next;
         }
-        jsc_o->next = panda_new_js_obj();
+        jsc_o->next = panda_new_js_obj(ctx);
         jsc_o->obj = func_val;
         
         /* the module is already referenced, so we must free it */
@@ -101,19 +101,19 @@ static void compile_file(JSContext *ctx, panda_js_obj *jsc_o, const char *filena
     jsc_o->obj = obj;
 }
 
-panda_js_obj *panda_new_js_obj(){
+panda_js_obj *panda_new_js_obj(JSContext *ctx){
     log_debug("panda_new_js_obj", 0);
-    panda_js_obj *r = (panda_js_obj *)malloc(sizeof(panda_js_obj));
+    panda_js_obj *r = (panda_js_obj *)pjsc(js_malloc)(ctx, sizeof(panda_js_obj));
     if(!r){
         log_error("Cannot apply for memory", 0);
         return nullptr;
     }
     r->byte_swap = FALSE;
-    r->cmodule_list = (namelist_t *)malloc(sizeof(namelist_t));
+    r->cmodule_list = (namelist_t *)pjsc(js_malloc)(ctx, sizeof(namelist_t));
     r->cmodule_list->array = nullptr;
     r->cmodule_list->count = 0;
     r->cmodule_list->size = 0;
-    r->init_module_list = (namelist_t *)malloc(sizeof(namelist_t));
+    r->init_module_list = (namelist_t *)pjsc(js_malloc)(ctx, sizeof(namelist_t));
     r->init_module_list->array = nullptr;
     r->init_module_list->count = 0;
     r->init_module_list->size = 0;
@@ -126,15 +126,15 @@ void panda_free_js_obj(JSContext *ctx, panda_js_obj *ptr){
     if(ptr == nullptr) return;
     namelist_free(ptr->cmodule_list);
     namelist_free(ptr->init_module_list);
-    free(ptr->cmodule_list);
-    free(ptr->init_module_list);
+    pjsc(js_free)(ctx, ptr->cmodule_list);
+    pjsc(js_free)(ctx, ptr->init_module_list);
     panda_free_js_obj(ctx, ptr->next);
-    free(ptr);
+    pjsc(js_free)(ctx, ptr);
 }
 
 panda_js_obj *panda_js_toObj(JSRuntime *rt, JSContext *ctx, const char *filename) {
-    log_debug("panda_js_toObj filename: {%d}", filename);
-    panda_js_obj *jsc_o = panda_new_js_obj();
+    log_debug("panda_js_toObj filename: {%s}", filename);
+    panda_js_obj *jsc_o = panda_new_js_obj(ctx);
 
     if(!jsc_o) {
         return nullptr;

@@ -642,37 +642,12 @@ JSValue __js_printf_like(2, 3) JS_ThrowRangeError(JSContext *ctx, const char *fm
 JSValue __js_printf_like(2, 3) JS_ThrowInternalError(JSContext *ctx, const char *fmt, ...);
 JSValue JS_ThrowOutOfMemory(JSContext *ctx);
 
-extern void (*WIN___JS_FreeValue)(JSContext *ctx, JSValue v);
-extern void (*WIN___JS_FreeValueRT)(JSRuntime *rt, JSValue v);
+// extern void (*WIN___JS_FreeValue)(JSContext *ctx, JSValue v);
+// extern void (*WIN___JS_FreeValueRT)(JSRuntime *rt, JSValue v);
 
 void __JS_FreeValue(JSContext *ctx, JSValue v);
-static inline void JS_FreeValue(JSContext *ctx, JSValue v)
-{
-    if (JS_VALUE_HAS_REF_COUNT(v)) {
-        JSRefCountHeader *p = (JSRefCountHeader *)JS_VALUE_GET_PTR(v);
-        if (--p->ref_count <= 0) {
-#ifdef _MSC_VER
-            WIN___JS_FreeValue(ctx, v);
-#else
-            __JS_FreeValue(ctx, v);
-#endif
-        }
-    }
-}
 void __JS_FreeValueRT(JSRuntime *rt, JSValue v);
-static inline void JS_FreeValueRT(JSRuntime *rt, JSValue v)
-{
-    if (JS_VALUE_HAS_REF_COUNT(v)) {
-        JSRefCountHeader *p = (JSRefCountHeader *)JS_VALUE_GET_PTR(v);
-        if (--p->ref_count <= 0) {
-#ifdef _MSC_VER
-            WIN___JS_FreeValueRT(rt, v);
-#else
-            __JS_FreeValueRT(rt, v);
-#endif
-        }
-    }
-}
+
 
 static inline JSValue JS_DupValue(JSContext *ctx, JSValueConst v)
 {
