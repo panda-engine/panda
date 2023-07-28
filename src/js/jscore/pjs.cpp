@@ -165,6 +165,8 @@ panda_js *panda_js_to(JSRuntime *rt, const char *filename, panda_js_t type){
         return nullptr;
     }
 
+    
+
     pjsc(js_std_add_helpers)(pjs->ctx, 0, nullptr);
 
     return pjs;

@@ -7,7 +7,7 @@ int main(int argc, char **argv){
 #ifdef _MSC_VER
     win_jsc_fn_init(".\\engine\\bin\\jsc.dll");
 #endif
-    set_log(all);
+    set_log(off);
     pmem *pma = pmem_new_alloc(0, normal);
     JSRuntime *rt = panda_jsc_new_rt(pma);
 
