@@ -1,9 +1,0 @@
-[submodule "src/tp/bfgx"]
-	path = src/tp/bfgx
-	url = https://github.com/panda-engine/bgfx-fork.git
-[submodule "src/tp/bx"]
-	path = src/tp/bx
-	url = https://github.com/bkaradzic/bx.git
-[submodule "src/tp/bimg"]
-	path = src/tp/bimg
-	url = https://github.com/bkaradzic/bimg.git
