@@ -37,7 +37,9 @@ constexpr inline void log_info(const S &str, Args &&...args) {
     printf(str, std::forward<Args>(args)...);
     puts(" *");
 }
+
 #endif
+
 template <typename S, typename... Args>
 constexpr inline void log_warn(const S &str, Args &&...args) {
     if (!log_s[2].load(std::memory_order_acquire))

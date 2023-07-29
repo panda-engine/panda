@@ -4,7 +4,7 @@ add_requires("quickjs")
 --add_includedirs("./inc")
 
 target("jsc")
-    add_deps("log", "pmalloc")
+    add_deps("pmalloc", "log")
     set_kind("static")
     add_files("./*.cpp", "./cutils.c")
     set_languages("cxx20")

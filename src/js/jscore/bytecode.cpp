@@ -37,23 +37,18 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx, const char *module_name,
                                       void *opaque) {
     log_debug("jsc_module_loader modulename:{%s}", module_name);
     JSModuleDef *m;
-    namelist_entry_t *e;
+    char *find_buf;
     panda_js_bc *jsc_b = (panda_js_bc *)opaque;
 
-    /* check if it is a declared C or system module */
-    e = namelist_find(jsc_b->cmodule_list, module_name);
-    if (e) {
-        /* add in the static init module list */
-        namelist_add(jsc_b->init_module_list, e->name, e->short_name);
-        /* create a dummy module */
-        m = pjsc(JS_NewCModule)(ctx, module_name, js_module_dummy_init);
+    find_buf = namelist_find(jsc_b->cmodule_list, module_name);
+    if (find_buf) {
+        m = panda_js_init_cmodule(ctx, find_buf);
     } else if (has_suffix(module_name, ".so") ||
                has_suffix(module_name, ".dll")) {
+
         log_warn("binary module will be dynamically loaded", 0);
         /* create a dummy module */
         m = pjsc(JS_NewCModule)(ctx, module_name, js_module_dummy_init);
-        /* the resulting executable will export its symbols for the
-           dynamic library */
     } else {
         size_t buf_len;
         uint8_t *buf;
@@ -144,26 +139,19 @@ panda_js_bc *panda_new_js_bc(JSContext *ctx) {
     r->bytecode = nullptr;
     r->bytecode_len = 0;
     r->cmodule_list = (namelist_t *)pjsc(js_malloc)(ctx, sizeof(namelist_t));
-    r->cmodule_list->array = nullptr;
-    r->cmodule_list->count = 0;
-    r->cmodule_list->size = 0;
-    r->init_module_list =
-        (namelist_t *)pjsc(js_malloc)(ctx, sizeof(namelist_t));
-    r->init_module_list->array = nullptr;
-    r->init_module_list->count = 0;
-    r->init_module_list->size = 0;
+    r->cmodule_list->name_array = nullptr;
+    r->cmodule_list->len = 0;
+    r->cmodule_list->cap = 0;
     r->next = nullptr;
     return r;
 }
 
 void panda_free_js_bc(JSContext *ctx, panda_js_bc *ptr) {
-    log_debug("panda_free_js_bc", 0);
     if (ptr == nullptr)
         return;
+    log_debug("panda_free_js_bc", 0);
     namelist_free(ptr->cmodule_list);
-    namelist_free(ptr->init_module_list);
     pjsc(js_free)(ctx, ptr->cmodule_list);
-    pjsc(js_free)(ctx, ptr->init_module_list);
     pjsc(js_free)(ctx, ptr->bytecode);
     panda_free_js_bc(ctx, ptr->next);
     pjsc(js_free)(ctx, ptr);
@@ -178,7 +166,7 @@ panda_js_bc *panda_js_toBytecode(JSRuntime *rt, JSContext *ctx,
         return nullptr;
     }
 
-    namelist_init_add_cmoudule(jsc_b->cmodule_list);
+    namelist_add_cmodule(jsc_b->cmodule_list);
     pjsc(JS_SetModuleLoaderFunc)(rt, nullptr, jsc_module_loader, jsc_b);
     compile_file(ctx, jsc_b, filename);
 
