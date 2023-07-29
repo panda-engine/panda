@@ -1,6 +1,6 @@
 /*
  * C utilities
- * 
+ *
  * Copyright (c) 2017 Fabrice Bellard
  * Copyright (c) 2018 Charlie Gordon
  *
@@ -22,22 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <stdlib.h>
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "cutils.h"
 
-void pstrcpy(char *buf, int buf_size, const char *str)
-{
+void pstrcpy(char *buf, int buf_size, const char *str) {
     int c;
     char *q = buf;
 
     if (buf_size <= 0)
         return;
 
-    for(;;) {
+    for (;;) {
         c = *str++;
         if (c == 0 || q >= buf + buf_size - 1)
             break;
@@ -47,8 +46,7 @@ void pstrcpy(char *buf, int buf_size, const char *str)
 }
 
 /* strcat and truncate. */
-char *pstrcat(char *buf, int buf_size, const char *s)
-{
+char *pstrcat(char *buf, int buf_size, const char *s) {
     int len;
     len = strlen(buf);
     if (len < buf_size)
@@ -56,8 +54,7 @@ char *pstrcat(char *buf, int buf_size, const char *s)
     return buf;
 }
 
-int strstart(const char *str, const char *val, const char **ptr)
-{
+int strstart(const char *str, const char *val, const char **ptr) {
     const char *p, *q;
     p = str;
     q = val;
@@ -72,8 +69,7 @@ int strstart(const char *str, const char *val, const char **ptr)
     return 1;
 }
 
-int has_suffix(const char *str, const char *suffix)
-{
+int has_suffix(const char *str, const char *suffix) {
     size_t len = strlen(str);
     size_t slen = strlen(suffix);
     return (len >= slen && !memcmp(str + len - slen, suffix, slen));
@@ -81,13 +77,11 @@ int has_suffix(const char *str, const char *suffix)
 
 /* Dynamic buffer package */
 
-static void *dbuf_default_realloc(void *opaque, void *ptr, size_t size)
-{
+static void *dbuf_default_realloc(void *opaque, void *ptr, size_t size) {
     return realloc(ptr, size);
 }
 
-void dbuf_init2(DynBuf *s, void *opaque, DynBufReallocFunc *realloc_func)
-{
+void dbuf_init2(DynBuf *s, void *opaque, DynBufReallocFunc *realloc_func) {
     memset(s, 0, sizeof(*s));
     if (!realloc_func)
         realloc_func = dbuf_default_realloc;
@@ -95,14 +89,10 @@ void dbuf_init2(DynBuf *s, void *opaque, DynBufReallocFunc *realloc_func)
     s->realloc_func = realloc_func;
 }
 
-void dbuf_init(DynBuf *s)
-{
-    dbuf_init2(s, NULL, NULL);
-}
+void dbuf_init(DynBuf *s) { dbuf_init2(s, NULL, NULL); }
 
 /* return < 0 if error */
-int dbuf_realloc(DynBuf *s, size_t new_size)
-{
+int dbuf_realloc(DynBuf *s, size_t new_size) {
     size_t size;
     uint8_t *new_buf;
     if (new_size > s->allocated_size) {
@@ -122,8 +112,7 @@ int dbuf_realloc(DynBuf *s, size_t new_size)
     return 0;
 }
 
-int dbuf_write(DynBuf *s, size_t offset, const uint8_t *data, size_t len)
-{
+int dbuf_write(DynBuf *s, size_t offset, const uint8_t *data, size_t len) {
     size_t end;
     end = offset + len;
     if (dbuf_realloc(s, end))
@@ -134,8 +123,7 @@ int dbuf_write(DynBuf *s, size_t offset, const uint8_t *data, size_t len)
     return 0;
 }
 
-int dbuf_put(DynBuf *s, const uint8_t *data, size_t len)
-{
+int dbuf_put(DynBuf *s, const uint8_t *data, size_t len) {
     if (unlikely((s->size + len) > s->allocated_size)) {
         if (dbuf_realloc(s, s->size + len))
             return -1;
@@ -145,8 +133,7 @@ int dbuf_put(DynBuf *s, const uint8_t *data, size_t len)
     return 0;
 }
 
-int dbuf_put_self(DynBuf *s, size_t offset, size_t len)
-{
+int dbuf_put_self(DynBuf *s, size_t offset, size_t len) {
     if (unlikely((s->size + len) > s->allocated_size)) {
         if (dbuf_realloc(s, s->size + len))
             return -1;
@@ -156,22 +143,17 @@ int dbuf_put_self(DynBuf *s, size_t offset, size_t len)
     return 0;
 }
 
-int dbuf_putc(DynBuf *s, uint8_t c)
-{
-    return dbuf_put(s, &c, 1);
-}
+int dbuf_putc(DynBuf *s, uint8_t c) { return dbuf_put(s, &c, 1); }
 
-int dbuf_putstr(DynBuf *s, const char *str)
-{
+int dbuf_putstr(DynBuf *s, const char *str) {
     return dbuf_put(s, (const uint8_t *)str, strlen(str));
 }
 
 int
 #ifndef _MSC_VER
-__attribute__((format(printf, 2, 3)))
+    __attribute__((format(printf, 2, 3)))
 #endif
-dbuf_printf(DynBuf *s, const char *fmt, ...)
-{
+    dbuf_printf(DynBuf *s, const char *fmt, ...) {
     va_list ap;
     char buf[128];
     int len;
@@ -186,16 +168,15 @@ dbuf_printf(DynBuf *s, const char *fmt, ...)
         if (dbuf_realloc(s, s->size + len + 1))
             return -1;
         va_start(ap, fmt);
-        vsnprintf((char *)(s->buf + s->size), s->allocated_size - s->size,
-                  fmt, ap);
+        vsnprintf((char *)(s->buf + s->size), s->allocated_size - s->size, fmt,
+                  ap);
         va_end(ap);
         s->size += len;
     }
     return 0;
 }
 
-void dbuf_free(DynBuf *s)
-{
+void dbuf_free(DynBuf *s) {
     /* we test s->buf as a fail safe to avoid crashing if dbuf_free()
        is called twice */
     if (s->buf) {
@@ -206,8 +187,7 @@ void dbuf_free(DynBuf *s)
 
 /* Note: at most 31 bits are encoded. At most UTF8_CHAR_LEN_MAX bytes
    are output. */
-int unicode_to_utf8(uint8_t *buf, unsigned int c)
-{
+int unicode_to_utf8(uint8_t *buf, unsigned int c) {
     uint8_t *q = buf;
 
     if (c < 0x80) {
@@ -251,8 +231,7 @@ static const unsigned char utf8_first_code_mask[5] = {
 
 /* return -1 if error. *pp is not updated in this case. max_len must
    be >= 1. The maximum length for a UTF8 byte sequence is 6 bytes. */
-int unicode_from_utf8(const uint8_t *p, int max_len, const uint8_t **pp)
-{
+int unicode_from_utf8(const uint8_t *p, int max_len, const uint8_t **pp) {
     int l, c, b, i;
 
     c = *p++;
@@ -275,7 +254,7 @@ int unicode_from_utf8(const uint8_t *p, int max_len, const uint8_t **pp)
     else
         return -1;
 #else
-    switch(c) {
+    switch (c) {
     case 0xc0 ... 0xdf:
         l = 1;
         break;
@@ -300,7 +279,7 @@ int unicode_from_utf8(const uint8_t *p, int max_len, const uint8_t **pp)
     if (l > (max_len - 1))
         return -1;
     c &= utf8_first_code_mask[l - 1];
-    for(i = 0; i < l; i++) {
+    for (i = 0; i < l; i++) {
         b = *p++;
         if (b < 0x80 || b >= 0xc0)
             return -1;
@@ -476,8 +455,8 @@ static inline exchange_f exchange_func(const void *base, size_t size) {
     }
 }
 
-static void heapsortx(void *base, size_t nmemb, size_t size, cmp_f cmp, void *opaque)
-{
+static void heapsortx(void *base, size_t nmemb, size_t size, cmp_f cmp,
+                      void *opaque) {
     uint8_t *basep = (uint8_t *)base;
     size_t i, n, c, r;
     exchange_f swap = exchange_func(base, size);
@@ -489,7 +468,8 @@ static void heapsortx(void *base, size_t nmemb, size_t size, cmp_f cmp, void *op
         while (i > 0) {
             i -= size;
             for (r = i; (c = r * 2 + size) < n; r = c) {
-                if (c < n - size && cmp(basep + c, basep + c + size, opaque) <= 0)
+                if (c < n - size &&
+                    cmp(basep + c, basep + c + size, opaque) <= 0)
                     c += size;
                 if (cmp(basep + r, basep + c, opaque) > 0)
                     break;
@@ -500,7 +480,8 @@ static void heapsortx(void *base, size_t nmemb, size_t size, cmp_f cmp, void *op
             swap(basep, basep + i, size);
 
             for (r = 0; (c = r * 2 + size) < i; r = c) {
-                if (c < i - size && cmp(basep + c, basep + c + size, opaque) <= 0)
+                if (c < i - size &&
+                    cmp(basep + c, basep + c + size, opaque) <= 0)
                     c += size;
                 if (cmp(basep + r, basep + c, opaque) > 0)
                     break;
@@ -510,17 +491,19 @@ static void heapsortx(void *base, size_t nmemb, size_t size, cmp_f cmp, void *op
     }
 }
 
-static inline void *med3(void *a, void *b, void *c, cmp_f cmp, void *opaque)
-{
-    return cmp(a, b, opaque) < 0 ?
-        (cmp(b, c, opaque) < 0 ? b : (cmp(a, c, opaque) < 0 ? c : a )) :
-        (cmp(b, c, opaque) > 0 ? b : (cmp(a, c, opaque) < 0 ? a : c ));
+static inline void *med3(void *a, void *b, void *c, cmp_f cmp, void *opaque) {
+    return cmp(a, b, opaque) < 0
+               ? (cmp(b, c, opaque) < 0 ? b : (cmp(a, c, opaque) < 0 ? c : a))
+               : (cmp(b, c, opaque) > 0 ? b : (cmp(a, c, opaque) < 0 ? a : c));
 }
 
 /* pointer based version with local stack and insertion sort threshhold */
-void rqsort(void *base, size_t nmemb, size_t size, cmp_f cmp, void *opaque)
-{
-    struct { uint8_t *base; size_t count; int depth; } stack[50], *sp = stack;
+void rqsort(void *base, size_t nmemb, size_t size, cmp_f cmp, void *opaque) {
+    struct {
+        uint8_t *base;
+        size_t count;
+        int depth;
+    } stack[50], *sp = stack;
     uint8_t *ptr, *pi, *pj, *plt, *pgt, *top, *m;
     size_t m4, i, lt, gt, span, span2;
     int c, depth;
@@ -552,7 +535,7 @@ void rqsort(void *base, size_t nmemb, size_t size, cmp_f cmp, void *opaque)
             /* should use median of 5 or 9? */
             m4 = (nmemb >> 2) * size;
             m = med3(ptr + m4, ptr + 2 * m4, ptr + 3 * m4, cmp, opaque);
-            swap(ptr, m, size);  /* move the pivot to the start or the array */
+            swap(ptr, m, size); /* move the pivot to the start or the array */
             i = lt = 1;
             pi = plt = ptr + size;
             gt = nmemb;
@@ -631,7 +614,8 @@ void rqsort(void *base, size_t nmemb, size_t size, cmp_f cmp, void *opaque)
         }
         /* Use insertion sort for small fragments */
         for (pi = ptr + size, top = ptr + nmemb * size; pi < top; pi += size) {
-            for (pj = pi; pj > ptr && cmp(pj - size, pj, opaque) > 0; pj -= size)
+            for (pj = pi; pj > ptr && cmp(pj - size, pj, opaque) > 0;
+                 pj -= size)
                 swap(pj, pj - size, size);
         }
     }

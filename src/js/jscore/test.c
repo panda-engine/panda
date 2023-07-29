@@ -3,7 +3,7 @@
 #include "log.h"
 #include "pmalloc.h"
 
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
 #ifdef _MSC_VER
     win_jsc_fn_init(".\\engine\\bin\\jsc.dll");
 #endif

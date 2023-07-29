@@ -2,7 +2,7 @@
 #include "pmalloc.h"
 #include <stdio.h>
 
-int main(){
+int main() {
     pmem *p = pmem_new_alloc(0, normal);
 
     char *str = p->alloc(sizeof(char) * 20);

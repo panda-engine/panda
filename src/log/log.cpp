@@ -1,17 +1,17 @@
 #include "log.h"
 
-#include <cstdarg>
 #include <cassert>
+#include <cstdarg>
 
 std::atomic_bool log_s[4] = {{false}};
 
-static void init(){
+static void init() {
     for (int i = 0; i < 4; ++i) {
         log_s[i].store(false, std::memory_order_release);
     }
 }
 
-void set_log(log_grade g){
+void set_log(log_grade g) {
     if (g == debug) {
         log_s[0].store(true, std::memory_order_release);
     } else if (g == info) {

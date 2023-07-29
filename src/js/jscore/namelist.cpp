@@ -4,28 +4,32 @@
 
 #include <pmalloc.h>
 
-void namelist_add(namelist_t *lp, const char *name, const char *short_name, int flags) {
+void namelist_add(namelist_t *lp, const char *name, const char *short_name) {
 
     namelist_entry_t *e;
+
     if (lp->count == lp->size) {
         size_t newsize = lp->size + (lp->size >> 1) + 4;
-        namelist_entry_t *a = 
-                    (namelist_entry_t *)mi_realloc(lp->array, sizeof(lp->array[0]) * newsize);
-        if(!a) {
+        namelist_entry_t *a = (namelist_entry_t *)mi_realloc(
+            lp->array, sizeof(lp->array[0]) * newsize);
 
+        if (!a) {
+            log_error("namelist_add: realloc error", 0);
+            return;
         }
+
         lp->array = a;
         lp->size = newsize;
     }
-    e =  &lp->array[lp->count++];
+
+    e = &lp->array[lp->count++];
     e->name = mi_strdup(name);
+
     if (short_name) {
         e->short_name = mi_strdup(short_name);
-    }
-    else {
+    } else {
         e->short_name = nullptr;
     }
-    e->flags = flags;
 }
 
 void namelist_free(namelist_t *lp) {
@@ -42,14 +46,15 @@ void namelist_free(namelist_t *lp) {
 
 namelist_entry_t *namelist_find(namelist_t *lp, const char *name) {
     int i;
-    for(i = 0; i < lp->count; i++) {
+    for (i = 0; i < lp->count; i++) {
         namelist_entry_t *e = &lp->array[i];
-        if (!strcmp(e->name, name)) return e;
+        if (!strcmp(e->name, name))
+            return e;
     }
     return nullptr;
 }
 
-void namelist_init_add_cmoudule(namelist_t * n) {
-    namelist_add(n, "std", "std", 0);
-    namelist_add(n, "os", "os", 0);
+void namelist_init_add_cmoudule(namelist_t *n) {
+    namelist_add(n, "std", "std");
+    namelist_add(n, "os", "os");
 }
