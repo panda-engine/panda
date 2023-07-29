@@ -51,6 +51,11 @@ void cmodule_list_add(char *name, init_module_t fn) {
 JSModuleDef *panda_js_init_cmodule(JSContext *ctx, const char *cmodule_name) {
     log_debug("panda_js_init_cmodule:{%s}", cmodule_name);
 
+    if (!cmodule_name) {
+        log_error("cmodule_name is null", 0);
+        return nullptr;
+    }
+
     if (!strcmp(cmodule_name, "std")) {
         log_warn("js_init_module_std be call!", 0);
         return pjsc(js_init_module_std)(ctx, cmodule_name);
@@ -58,10 +63,6 @@ JSModuleDef *panda_js_init_cmodule(JSContext *ctx, const char *cmodule_name) {
     if (!strcmp(cmodule_name, "os")) {
         log_warn("js_init_module_os be call!", 0);
         return pjsc(js_init_module_os)(ctx, cmodule_name);
-    }
-
-    if (!cmodule_name) {
-        return nullptr;
     }
 
     if (!cl_load) {
