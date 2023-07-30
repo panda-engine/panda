@@ -1,6 +1,6 @@
 
-#include "init_cmodule.h"
-#include "jsc.h"
+#include "ffi/ffi.h"
+#include "jscore/jsc.h"
 #include "log.h"
 #include "pmalloc.h"
 
@@ -24,7 +24,8 @@ void namelist_add(namelist_t *lp, const char *name) {
 }
 
 void namelist_free(namelist_t *lp) {
-
+    if(lp == nullptr) 
+        return;
     while (lp->len > 0) {
         mi_free(lp->name_array[--lp->len]);
     }

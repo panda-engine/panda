@@ -1,5 +1,5 @@
 
-#include "jsc.h"
+#include "jscore/jsc.h"
 #include "log.h"
 
 #if defined(__APPLE__)

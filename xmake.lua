@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_includedirs("src/log/inc", "src/js/jscore/inc", 
+add_includedirs("src/log/inc", "src/js/inc", 
                 "src/malloc/inc", "src/tp/inc")
 
 includes("src/log/**xmake.lua", "src/malloc/**xmake.lua", 
@@ -13,4 +13,4 @@ target("panda")
 
 target("test_all")
     set_kind("phony")
-    add_deps("test_jsc", "test_log", "test_pmalloc")
+    add_deps("test_js", "test_log", "test_pmalloc")

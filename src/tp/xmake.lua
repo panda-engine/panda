@@ -37,6 +37,33 @@ target("bgfx")
     --     end
     -- end)
 
+target("bullet")
+    set_kind("phony")
+    --add_links("Bullet2FileLoader", "Bullet3Collision", "Bullet3Common", "Bullet3Dynamics", "Bullet3Geometry", "Bullet3OpenCL_clew", "BulletDynamics", "BulletCollision", "BulletInverseDynamics", "BulletSoftBody", "LinearMath")
+    before_build(function (target) 
+        os.cd("src/tp/bullet")
+        os.trycp("./src/", "../inc/bullet")
+        if not os.isdir("./build") then 
+            os.mkdir("./build")
+        end
+        local configs = {"-DBUILD_CPU_DEMOS=OFF", "-DBUILD_OPENGL3_DEMOS=OFF", "-DBUILD_BULLET2_DEMOS=OFF", "-DBUILD_UNIT_TESTS=OFF", "-DINSTALL_LIBS=ON", "-DCMAKE_DEBUG_POSTFIX="}
+        table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (is_mode("debug") and "Debug" or "Release"))
+        table.insert(configs, "-DBUILD_SHARED_LIBS=OFF")
+        table.insert(configs, "-DUSE_DOUBLE_PRECISION=OFF")
+        table.insert(configs, "-DBUILD_EXTRAS=OFF")
+        if is_plat("windows") then
+            table.insert(configs, "-DUSE_MSVC_RUNTIME_LIBRARY_DLL=OFF")
+        end
+        os.cd("./build")
+        local str = ""
+        for i, c in ipairs(configs) do
+            str = str .. c .. " "
+        end
+        os.exec("cmake .. " .. str)
+        os.exec("cmake --build . --config " .. (is_mode("debug") and "Debug" or "Release"))
+        os.addenv("PATH", "./lib/" .. (is_mode("debug") and "Debug/" or "Release/"))
+    end)
+
 target("tp")
     set_kind("phony")
-    add_deps("bgfx")
+    add_deps("bgfx", "bullet")

@@ -43,6 +43,8 @@ extern int win_jsc_fn_free();
 JSRuntime *panda_jsc_new_rt(pmem *alloc);
 void panda_jsc_free_rt(JSRuntime *p);
 
+JSModuleDef *js_init_module(JSContext *ctx, const char *module_name);
+
 typedef struct namelist_t {
     char **name_array;
     int len;
@@ -81,8 +83,6 @@ void panda_free_js_obj(JSContext *ctx, panda_js_obj *ptr);
 
 panda_js_obj *panda_js_toObj(JSRuntime *rt, JSContext *ctx,
                              const char *filename);
-
-JSModuleDef *panda_js_init_cmodule(JSContext *ctx, const char *cmodule);
 
 typedef enum {
     bytecode,

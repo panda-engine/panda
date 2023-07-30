@@ -1,5 +1,7 @@
 import { func } from "./func";
-import { out } from "std";
+//import { out } from "std";
+//import { fib } from "./test_dynamic.dll"
+import { p_suffix } from "ffi"
 
 export function hello() {
     console.log("Hello World");
@@ -18,4 +20,8 @@ for (; ;) {
 var f = func();
 f();
 
-out.puts("123")
+console.log(p_suffix);
+
+//out.puts("123\n");
+
+//console.log("fib(10)=", fib(10));

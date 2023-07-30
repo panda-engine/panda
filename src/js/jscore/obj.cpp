@@ -1,12 +1,8 @@
 
-#include "jsc.h"
+#include "ffi/ffi.h"
+#include "jscore/jsc.h"
 #include "log.h"
 #include <cstring>
-
-static int js_module_dummy_init(JSContext *ctx, JSModuleDef *m) {
-    log_error("should never be called when compiling JS code", 0);
-    return -1;
-}
 
 static JSModuleDef *jsc_module_loader(JSContext *ctx, const char *module_name,
                                       void *opaque) {
@@ -21,12 +17,9 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx, const char *module_name,
 
         m = panda_js_init_cmodule(ctx, find_buf);
 
-    } else if (has_suffix(module_name, ".so") ||
-               has_suffix(module_name, ".dll")) {
+    } else if (has_suffix(module_name, p_suffix)) {
 
-        log_warn("binary module will be dynamically loaded", 0);
-        /* create a dummy module */
-        m = pjsc(JS_NewCModule)(ctx, module_name, js_module_dummy_init);
+        m = panda_js_init_cmodule(ctx, module_name);
 
     } else {
 
@@ -39,7 +32,6 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx, const char *module_name,
         } else {
             size_t len = strlen(module_name);
             char *module_name_buf = (char *)pjsc(js_malloc)(ctx, len + 4);
-            memcpy(module_name_buf, module_name, len);
             snprintf(module_name_buf, len + 4, "%s.js", module_name);
             buf = pjsc(js_load_file)(ctx, &buf_len, module_name_buf);
             pjsc(js_free)(ctx, module_name_buf);

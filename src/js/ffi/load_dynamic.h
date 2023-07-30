@@ -1,0 +1,18 @@
+#ifndef load_dynamic_h_
+#define load_dynamic_h_
+
+#include "ffi/ffi.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void lib_list_free();
+
+ffi_cmodule_t load_dynamic(const char *filename, const char *funcname);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
