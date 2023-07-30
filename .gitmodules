@@ -7,6 +7,6 @@
 [submodule "src/tp/bgfx"]
 	path = src/tp/bgfx
 	url = https://github.com/panda-engine/bgfx-fork.git
-[submodule "src/tp/quickjspp"]
-	path = src/tp/quickjspp
-	url = https://github.com/panda-engine/quickjspp-fork.git
+[submodule "src/tp/bullet"]
+	path = src/tp/bullet
+	url = https://github.com/panda-engine/bullet3-fork
