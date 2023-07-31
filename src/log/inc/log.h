@@ -70,17 +70,19 @@ extern "C" {
 void set_log(log_grade g);
 
 #ifdef NDEBUG
-static inline void clog_error(const char* fmt, ...) {}
+static inline void clog_debug(const char* fmt, ...) {}
 #define assert(x) 
 #else
 #include <assert.h>
-
+#define clog_debug(msg, ...)                                                   \
+    printf("* DEBUG: ");                                                       \
+    printf(msg, __VA_ARGS__);                                                  \
+    puts(" *")
+#endif
 #define clog_error(msg, ...)                                                   \
     printf("* ERROR: ");                                                       \
     printf(msg, __VA_ARGS__);                                                  \
-    puts(" *");
-
-#endif
+    puts(" *")
 
 #ifdef __cplusplus
 }

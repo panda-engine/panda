@@ -68,12 +68,14 @@ static const JSMallocFunctions def_malloc_funcs = {
 };
 
 JSRuntime *panda_jsc_new_rt(pmem *alloc) {
+    log_debug("panda_jsc_new_rt", 0);
     JSRuntime *p = JS_NewRuntime2(&def_malloc_funcs, alloc);
     js_std_init_handlers(p);
     return p;
 }
 
 void panda_jsc_free_rt(JSRuntime *p) {
+    log_debug("panda_jsc_free_rt", 0);
     js_std_free_handlers(p);
     JS_FreeRuntime(p);
 }

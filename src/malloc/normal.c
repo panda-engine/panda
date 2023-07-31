@@ -5,7 +5,10 @@
 
 #include <mimalloc.h>
 
-void pmem_free_alloc(pmem *ptr) { mi_free(ptr); }
+void pmem_free_alloc(pmem *ptr) { 
+    clog_debug("pmem_free_alloc");
+    mi_free(ptr); 
+}
 
 pmem *pmem_new_alloc(size_t size, pmem_t type) {
     pmem *r = mi_malloc(sizeof(pmem));

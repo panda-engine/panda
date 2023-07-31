@@ -1,7 +1,7 @@
 import { func } from "./func";
 //import { out } from "std";
 import { p_suffix } from "ffi";
-import * as t from "./test_dynamic.dll";
+import {fib} from "./test_dynamic.dll";
 
 export function hello() {
     console.log("Hello World");
@@ -24,4 +24,4 @@ console.log(p_suffix);
 
 //out.puts("123\n");
 
-//console.log("fib(10)=", fib(10));
+console.log("fib(10)=", fib(10));

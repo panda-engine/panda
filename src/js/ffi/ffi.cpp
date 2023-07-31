@@ -54,9 +54,13 @@ void cmodule_list_add(const char *name, ffi_cmodule_t fn) {
     ++cl_load->len;
 }
 
-void panda_js_init_ffi() { cmodule_list_add("ffi", js_init_module_ffi); }
+void panda_js_init_ffi() { 
+    log_debug("panda_js_init_ffi", 0);
+    cmodule_list_add("ffi", js_init_module_ffi); 
+}
 
 void panda_js_free_ffi() {
+    log_debug("panda_js_free_ffi", 0);
     cmodule_list_free();
     mi_free((void *)cl_load);
     lib_list_free();
@@ -83,11 +87,6 @@ JSModuleDef *panda_js_init_cmodule(JSContext *ctx, const char *cmodule_name) {
         return js_init_module_os(ctx, cmodule_name);
     }
 
-    if (!cl_load) {
-        log_error("cmodule_list is not initialized!", 0);
-        return nullptr;
-    }
-
     if (has_suffix(cmodule_name, p_suffix)) {
         char module_name[MAX_NAME];
         int module_len = strlen(cmodule_name) - strlen(p_suffix);
@@ -110,6 +109,12 @@ JSModuleDef *panda_js_init_cmodule(JSContext *ctx, const char *cmodule_name) {
 
         return fn(ctx, module_name);
     }
+
+    if (!cl_load) {
+        log_error("cmodule_list is not initialized!", 0);
+        return nullptr;
+    }
+
 
     int size = cl_load->len;
 

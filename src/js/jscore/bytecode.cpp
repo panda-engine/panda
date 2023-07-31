@@ -40,11 +40,15 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx, const char *module_name,
     if (find_buf) {
 
         m = panda_js_init_cmodule(ctx, find_buf);
+        if(!m) 
+            log_error("panda_js_init_cmodule error:{%s}", find_buf);
 
     } else if (has_suffix(module_name, p_suffix)) {
 
         m = panda_js_init_cmodule(ctx, module_name);
-
+        if(!m) 
+            log_error("panda_js_init_cmodule error:{%s}", module_name);
+        
     } else {
         size_t buf_len;
         uint8_t *buf;

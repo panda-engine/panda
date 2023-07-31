@@ -5,10 +5,7 @@
 #include "ffi/ffi.h"
 
 int main(int argc, char **argv) {
-// #ifdef _MSC_VER
-//     win_jsc_fn_init(".\\engine\\bin\\jsc.dll");
-// #endif
-    //printf("hello\n");
+
     set_log(all);
     panda_js_init_ffi();
     //printf("hello\n");
@@ -24,8 +21,6 @@ int main(int argc, char **argv) {
     panda_jsc_free_rt(rt);
     pmem_free_alloc(pma);
     panda_js_free_ffi();
-// #ifdef _MSC_VER
-//     win_jsc_fn_free();
-// #endif
+
     return 0;
 }

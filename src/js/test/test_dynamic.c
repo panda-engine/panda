@@ -37,5 +37,5 @@ JSModuleDef *js_init_module(JSContext *ctx, const char *module_name) {
     if (!m)
         return NULL;
     JS_AddModuleExportList(ctx, m, js_fib_funcs, countof(js_fib_funcs));
-    return NULL;
+    return m;
 }

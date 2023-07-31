@@ -3,19 +3,10 @@
 #define jsc_h_
 
 #ifdef _MSC_VER
-//#include "win_def.h"
-
-#define XSTR(x) #x
-#define pjsc(fun) fun//((fun##_t)win_jsc_fn_call(XSTR(fun)))
-
 #ifndef pjs_dll
 #define pjs_dll __declspec(dllimport)
 #endif
-
 #else
-
-#define pjsc(fun) fun
-
 #ifndef pjs_dll
 #define pjs_dll 
 #endif
@@ -30,23 +21,6 @@ extern "C" {
 #include "quickjspp/cutils.h"
 #include "quickjspp/quickjs-libc.h"
 
-// static inline void JS_FreeValue(JSContext *ctx, JSValue v) {
-//     if (JS_VALUE_HAS_REF_COUNT(v)) {
-//         JSRefCountHeader *p = (JSRefCountHeader *)JS_VALUE_GET_PTR(v);
-//         if (--p->ref_count <= 0) {
-//             pjsc(__JS_FreeValue)(ctx, v);
-//         }
-//     }
-// }
-
-// static inline void JS_FreeValueRT(JSRuntime *rt, JSValue v) {
-//     if (JS_VALUE_HAS_REF_COUNT(v)) {
-//         JSRefCountHeader *p = (JSRefCountHeader *)JS_VALUE_GET_PTR(v);
-//         if (--p->ref_count <= 0) {
-//             pjsc(__JS_FreeValueRT)(rt, v);
-//         }
-//     }
-// }
 
 JSRuntime *panda_jsc_new_rt(pmem *alloc);
 void panda_jsc_free_rt(JSRuntime *p);

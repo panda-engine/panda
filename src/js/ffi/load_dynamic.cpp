@@ -86,6 +86,7 @@ LIB_T search_list(const char* filename){
 }
 
 ffi_cmodule_t load_dynamic(const char *filename, const char *fn_name) {
+    log_debug("load_dynamic file:{%s}, fn_name:{%s}", filename, fn_name);
 
     ffi_cmodule_t func = nullptr;
     LIB_T lib = search_list(filename);
