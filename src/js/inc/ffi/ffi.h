@@ -16,7 +16,7 @@ extern "C" {
 #error "Unknown_platform"
 #endif
 
-#include "jscore/quickjs.h"
+#include "quickjspp/quickjs.h"
 
 typedef JSModuleDef *(*ffi_cmodule_t)(JSContext *ctx, const char *module_name);
 

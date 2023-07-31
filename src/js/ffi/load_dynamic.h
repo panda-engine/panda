@@ -9,7 +9,7 @@ extern "C" {
 
 void lib_list_free();
 
-ffi_cmodule_t load_dynamic(const char *filename, const char *funcname);
+ffi_cmodule_t load_dynamic(const char *filename, const char *fn_name);
 
 #ifdef __cplusplus
 }

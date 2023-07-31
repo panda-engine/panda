@@ -5,17 +5,15 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#define LIB_T HMODULE
 #else
 #include <dlfcn.h>
+#define LIB_T void *
 #endif
 
 typedef struct {
     char *filename;
-#if defined(_WIN32) || defined(_WIN64)
-    HMODULE lib;
-#else
-    void *lib;
-#endif
+    LIB_T lib;
 } lib_t;
 
 typedef struct {
@@ -47,11 +45,7 @@ void lib_list_free() {
     mi_free(l_load); // this is an exception in panda_engine
 }
 
-#if defined(_WIN32) || defined(_WIN64)
-static void lib_list_add(const char *filename, HMODULE lib) {
-#else
-static void lib_list_add(const char *filename, void *lib) {
-#endif
+static void lib_list_add(const char *filename, LIB_T lib) {
 
     if (!l_load) {
         list.store((lib_list_t *)mi_malloc(sizeof(lib_list_t)),
@@ -80,17 +74,30 @@ static void lib_list_add(const char *filename, void *lib) {
     ++l_load->len;
 }
 
-ffi_cmodule_t load_dynamic(const char *filename, const char *funcname) {
+LIB_T search_list(const char* filename){
+    if(!l_load) 
+        return nullptr;
+    for (int i = 0; i < l_load->len; ++i) {
+        if (l_load->array[i].filename == filename) {
+            return l_load->array[i].lib;
+        }
+    }
+    return nullptr;
+}
+
+ffi_cmodule_t load_dynamic(const char *filename, const char *fn_name) {
 
     ffi_cmodule_t func = nullptr;
+    LIB_T lib = search_list(filename);
 
 #if defined(_WIN32) || defined(_WIN64)
 
-    HMODULE lib = LoadLibrary(filename);
+    if(!lib) 
+        lib = LoadLibrary(filename);
     if (lib) {
-        func = (ffi_cmodule_t)GetProcAddress(lib, funcname);
+        func = (ffi_cmodule_t)GetProcAddress(lib, fn_name);
         if (func == nullptr) {
-            log_error("load dynamic init func error", 0);
+            log_error("load dynamic init func error: {%s}", fn_name);
             log_error("GetProcAddress failed, error = %d", GetLastError());
             return nullptr;
         }
@@ -101,7 +108,8 @@ ffi_cmodule_t load_dynamic(const char *filename, const char *funcname) {
 
 #else
 
-    void *lib = dlopen(filename, RTLD_LAZY);
+    if(!lib) 
+        lib = dlopen(filename, RTLD_LAZY);
     if (lib) {
         func = (ffi_cmodule_t)dlsym(lib, funcname);
         if (func == nullptr) {

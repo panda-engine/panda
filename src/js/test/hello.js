@@ -1,7 +1,7 @@
 import { func } from "./func";
 //import { out } from "std";
-//import { fib } from "./test_dynamic.dll"
-import { p_suffix } from "ffi"
+import { p_suffix } from "ffi";
+import * as t from "./test_dynamic.dll";
 
 export function hello() {
     console.log("Hello World");

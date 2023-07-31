@@ -1,3 +1,5 @@
+
+#define pjs_dll __declspec(dllexport)
 #include "jscore/jsc.h"
 
 #define countof(x) (sizeof(x) / sizeof((x)[0]))
@@ -29,11 +31,11 @@ static int js_fib_init(JSContext *ctx, JSModuleDef *m) {
                                         countof(js_fib_funcs));
 }
 
-extern "C" JSModuleDef *js_init_module(JSContext *ctx, const char *module_name) {
+JSModuleDef *js_init_module(JSContext *ctx, const char *module_name) {
     JSModuleDef *m;
     m = pjsc(JS_NewCModule)(ctx, module_name, js_fib_init);
     if (!m)
         return NULL;
     pjsc(JS_AddModuleExportList)(ctx, m, js_fib_funcs, countof(js_fib_funcs));
-    return m;
+    return NULL;
 }

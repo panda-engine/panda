@@ -17,8 +17,8 @@ typedef enum log_grade {
 
 extern std::atomic_bool log_s[4];
 #ifdef NDEBUG
-#define log_debug(msg...) ((void)0)
-#define log_info(msg...) ((void)0)
+static inline void log_debug(const char* fmt, ...) {}
+static inline void log_info(const char* fmt, ...) {}
 #else
 
 template <typename S, typename... Args>
@@ -70,8 +70,8 @@ extern "C" {
 void set_log(log_grade g);
 
 #ifdef NDEBUG
-#define clog_error(msg, args...) ((void)0)
-#define assert(x) ((void)0)
+static inline void clog_error(const char* fmt, ...) {}
+#define assert(x) 
 #else
 #include <assert.h>
 

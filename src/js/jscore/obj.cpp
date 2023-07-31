@@ -20,7 +20,7 @@ static JSModuleDef *jsc_module_loader(JSContext *ctx, const char *module_name,
     } else if (has_suffix(module_name, p_suffix)) {
 
         m = panda_js_init_cmodule(ctx, module_name);
-
+        
     } else {
 
         size_t buf_len;

@@ -102,8 +102,7 @@ JSModuleDef *panda_js_init_cmodule(JSContext *ctx, const char *cmodule_name) {
                 pos = i;
         }
         snprintf(module_name, MAX_NAME - 1, "%.*s", module_len - pos - 1, cmodule_name + pos + 1);
-        // printf("name:%s\n", cmodule_name);
-        // printf("name:%s\n", module_name);
+
         ffi_cmodule_t fn = ffi_call_init_cmodule(cmodule_name);
 
         if(fn == nullptr)
