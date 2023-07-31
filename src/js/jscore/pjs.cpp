@@ -67,9 +67,29 @@ static const JSMallocFunctions def_malloc_funcs = {
     nullptr,
 };
 
+static JSContext *JS_NewCustomContext(JSRuntime *rt){
+    JSContext *ctx = JS_NewContextRaw(rt);
+    if (!ctx){
+        log_error("Can not alloc new ctx", 0);
+        return nullptr;
+    }
+    JS_AddIntrinsicBaseObjects(ctx);
+    JS_AddIntrinsicDate(ctx);
+    JS_AddIntrinsicEval(ctx);
+    JS_AddIntrinsicStringNormalize(ctx);
+    JS_AddIntrinsicRegExp(ctx);
+    JS_AddIntrinsicJSON(ctx);
+    JS_AddIntrinsicProxy(ctx);
+    JS_AddIntrinsicMapSet(ctx);
+    JS_AddIntrinsicTypedArrays(ctx);
+    JS_AddIntrinsicPromise(ctx);
+    return ctx;
+}
+
 JSRuntime *panda_jsc_new_rt(pmem *alloc) {
     log_debug("panda_jsc_new_rt", 0);
     JSRuntime *p = JS_NewRuntime2(&def_malloc_funcs, alloc);
+    js_std_set_worker_new_context_func(JS_NewCustomContext);
     js_std_init_handlers(p);
     return p;
 }
@@ -105,6 +125,7 @@ static void run_obj(JSContext *ctx, JSValue obj, int load_only) {
     }
 }
 
+
 panda_js *panda_new_js(JSRuntime *rt, panda_js_t type) {
     panda_js *r = (panda_js *)mi_malloc(sizeof(panda_js));
 
@@ -113,23 +134,12 @@ panda_js *panda_new_js(JSRuntime *rt, panda_js_t type) {
         return nullptr;
     }
 
-    r->ctx = JS_NewContextRaw(rt);
+    r->ctx = JS_NewCustomContext(rt);
     if (!r->ctx) {
         mi_free(r);
-        log_error("Can not alloc new ctx", 0);
         return nullptr;
     }
-    JS_AddIntrinsicBaseObjects(r->ctx);
-    JS_AddIntrinsicDate(r->ctx);
-    JS_AddIntrinsicEval(r->ctx);
-    JS_AddIntrinsicStringNormalize(r->ctx);
-    JS_AddIntrinsicRegExp(r->ctx);
-    JS_AddIntrinsicJSON(r->ctx);
-    JS_AddIntrinsicProxy(r->ctx);
-    JS_AddIntrinsicMapSet(r->ctx);
-    JS_AddIntrinsicTypedArrays(r->ctx);
-    JS_AddIntrinsicPromise(r->ctx);
-
+    
     r->ptr = nullptr;
     r->type = type;
     return r;
@@ -192,4 +202,5 @@ void panda_js_run(panda_js *pjs) {
         }
         run_obj(pjs->ctx, obj->obj, 0);
     }
+    js_std_loop(pjs->ctx);
 }

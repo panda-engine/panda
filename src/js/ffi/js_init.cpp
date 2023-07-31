@@ -6,7 +6,7 @@
 
 static const JSCFunctionListEntry js_ffi_funcs[] = {
     // JS_CFUNC_DEF("fib", 1, js_fib),
-    JS_PROP_STRING_DEF("p_suffix", p_suffix, 0),
+    JS_PROP_STRING_DEF("p_suffix", p_suffix, JS_PROP_ENUMERABLE),
 };
 
 static int js_ffi_init(JSContext *ctx, JSModuleDef *m) {
