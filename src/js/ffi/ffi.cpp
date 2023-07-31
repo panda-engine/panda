@@ -76,11 +76,11 @@ JSModuleDef *panda_js_init_cmodule(JSContext *ctx, const char *cmodule_name) {
 
     if (!strcmp(cmodule_name, "std")) {
         log_warn("js_init_module_std be call!", 0);
-        return pjsc(js_init_module_std)(ctx, cmodule_name);
+        return js_init_module_std(ctx, cmodule_name);
     }
     if (!strcmp(cmodule_name, "os")) {
         log_warn("js_init_module_os be call!", 0);
-        return pjsc(js_init_module_os)(ctx, cmodule_name);
+        return js_init_module_os(ctx, cmodule_name);
     }
 
     if (!cl_load) {
