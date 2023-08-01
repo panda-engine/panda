@@ -1,5 +1,8 @@
 .vscode
+.cache
 .xmake
 build
 
 src/tp/inc
+
+compile_commands.json
