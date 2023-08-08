@@ -54,6 +54,7 @@ panda_js_bc *panda_js_toBytecode(JSRuntime *rt, JSContext *ctx,
 
 typedef struct panda_js_obj {
     BOOL byte_swap;
+    int _padding;
     JSValue obj;
     namelist_t *cmodule_list;
     struct panda_js_obj *next;
@@ -72,6 +73,7 @@ typedef enum {
 
 typedef struct panda_js {
     panda_js_t type;
+    int _padding;
     void *ptr;
     JSContext *ctx;
 } panda_js;

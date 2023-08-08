@@ -15,12 +15,12 @@ static void *pjs_def_malloc(JSMallocState *s, size_t size) {
         return nullptr;
 
     pmem *pm = (pmem *)s->opaque;
-    ptr = pm->alloc(size);
+    ptr = pm->alloc(size, pm->_ptr);
     if (!ptr)
         return nullptr;
 
     s->malloc_count++;
-    s->malloc_size += pm->usable_size(ptr) + MALLOC_OVERHEAD;
+    s->malloc_size += pm->usable_size(ptr, pm->_ptr) + MALLOC_OVERHEAD;
     return ptr;
 }
 
@@ -29,8 +29,8 @@ static void pjs_def_free(JSMallocState *s, void *ptr) {
         return;
     pmem *pm = (pmem *)s->opaque;
     s->malloc_count--;
-    s->malloc_size -= pm->usable_size(ptr) + MALLOC_OVERHEAD;
-    pm->free(ptr);
+    s->malloc_size -= pm->usable_size(ptr, pm->_ptr) + MALLOC_OVERHEAD;
+    pm->free(ptr, pm->_ptr);
 }
 
 static void *pjs_def_realloc(JSMallocState *s, void *ptr, size_t size) {
@@ -42,21 +42,21 @@ static void *pjs_def_realloc(JSMallocState *s, void *ptr, size_t size) {
         return pjs_def_malloc(s, size);
     }
     pmem *pm = (pmem *)s->opaque;
-    old_size = pm->usable_size(ptr);
+    old_size = pm->usable_size(ptr, pm->_ptr);
     if (size == 0) {
         s->malloc_count--;
         s->malloc_size -= old_size + MALLOC_OVERHEAD;
-        pm->free(ptr);
+        pm->free(ptr, pm->_ptr);
         return nullptr;
     }
     if (s->malloc_size + size - old_size > s->malloc_limit)
         return nullptr;
 
-    ptr = pm->realloc(ptr, size);
+    ptr = pm->realloc(ptr, size, pm->_ptr);
     if (!ptr)
         return nullptr;
 
-    s->malloc_size += pm->usable_size(ptr) - old_size;
+    s->malloc_size += pm->usable_size(ptr, pm->_ptr) - old_size;
     return ptr;
 }
 
@@ -101,7 +101,7 @@ void panda_jsc_free_rt(JSRuntime *p) {
 }
 
 static void run_obj(JSContext *ctx, JSValue obj, int load_only) {
-    log_debug("run_obj: obj_tag{%d} load_only{%d}", obj, load_only);
+    log_debug("run_obj: load_only{%d}", load_only);
     JSValue val;
     if (load_only) {
         if (JS_VALUE_GET_TAG(obj) == JS_TAG_MODULE) {
