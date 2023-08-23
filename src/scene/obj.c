@@ -1,5 +1,5 @@
 
-#include "obj/obj.h"
+#include "obj.h"
 #include "log.h"
 
 static void obj_component_add_mi_malloc(obj_t *obj, component_t *cp) {
