@@ -3,8 +3,10 @@ add_rules("mode.debug", "mode.release")
 add_includedirs("src/log/inc", "src/js/inc", 
                 "src/malloc/inc", "src/scene/inc", "src/tp/inc")
 
-includes("src/log/**xmake.lua", "src/malloc/**xmake.lua", 
-        "src/js/**xmake.lua", "src/tp/**xmake.lua")
+-- includes("src/log/**xmake.lua", "src/malloc/**xmake.lua", 
+--         "src/js/**xmake.lua", "src/tp/**xmake.lua")
+
+includes("src/*/xmake.lua")
 
 target("panda")
     set_kind("phony")
