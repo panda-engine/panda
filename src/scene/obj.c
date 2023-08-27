@@ -3,7 +3,8 @@
 #include "log.h"
 
 static void obj_component_add_mi_malloc(obj_t *obj, component_t *cp) {
-    if (obj->cap >= obj->len) {
+
+    if (obj->cap <= obj->len) {
         size_t new_cap = obj->cap + (obj->cap >> 1) + 4;
 
         component_t *new_array =
@@ -62,6 +63,9 @@ void panda_set_obj_name(obj_t *obj, const char *name) {
 
 void panda_free_obj(pmem *pm, obj_t *obj) {
 
+    if (!obj)
+        return;
+
     mi_free(obj->name);
 
     if (!pm) {
@@ -115,6 +119,9 @@ void panda_set_component_name(component_t *component, const char *name) {
 
 void panda_free_component(pmem *pm, component_t *component) {
 
+    if (!component)
+        return;
+
     mi_free(component->name);
 
     if (!pm) {
@@ -145,7 +152,7 @@ void panda_obj_component_add(pmem *pm, obj_t *obj, component_t *cp) {
         return;
     }
 
-    if (obj->cap >= obj->len) {
+    if (obj->cap <= obj->len) {
         size_t new_cap = obj->cap + (obj->cap >> 1) + 4;
 
         component_t *new_array =
