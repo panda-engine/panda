@@ -24,7 +24,12 @@ typedef struct {
 
 // transform fn
 transform_t *panda_new_transform(pmem *pm);
+// m is x, y, z, w
+void panda_set_transform_m(transform_t *transform, const float *m);
+// t is t[4][4]
+void panda_set_transform_t(transform_t *transform, const float **t);
 void panda_set_transform_canmove(transform_t *transform, const int can_move);
+
 void panda_free_transform(pmem *pm, transform_t *transform);
 
 #ifdef __cplusplus
