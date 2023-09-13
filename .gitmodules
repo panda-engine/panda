@@ -1,15 +1,15 @@
-[submodule "src/tp/bimg"]
-	path = src/tp/bimg
-	url = https://github.com/bkaradzic/bimg.git
-[submodule "src/tp/bx"]
-	path = src/tp/bx
-	url = https://github.com/bkaradzic/bx.git
-[submodule "src/tp/bgfx"]
-	path = src/tp/bgfx
-	url = https://github.com/panda-engine/bgfx-fork.git
-[submodule "src/tp/bullet"]
-	path = src/tp/bullet
-	url = https://github.com/panda-engine/bullet3-fork
+# [submodule "src/tp/bimg"]
+# 	path = src/tp/bimg
+# 	url = https://github.com/bkaradzic/bimg.git
+# [submodule "src/tp/bx"]
+# 	path = src/tp/bx
+# 	url = https://github.com/bkaradzic/bx.git
+# [submodule "src/tp/bgfx"]
+# 	path = src/tp/bgfx
+# 	url = https://github.com/panda-engine/bgfx-fork.git
+# [submodule "src/tp/bullet"]
+# 	path = src/tp/bullet
+# 	url = https://github.com/panda-engine/bullet3-fork
 [submodule "src/tp/quickjspp"]
 	path = src/tp/quickjspp
 	url = https://github.com/panda-engine/quickjspp-fork.git
