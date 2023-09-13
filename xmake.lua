@@ -2,7 +2,7 @@ add_rules("mode.debug", "mode.release")
 
 add_includedirs("src/log/inc", "src/js/inc", 
                 "src/malloc/inc", "src/scene/inc", "src/tp/inc",
-                "src/transform/inc")
+                "src/transform/inc", "src/render/inc")
 
 -- includes("src/log/**xmake.lua", "src/malloc/**xmake.lua", 
 --         "src/js/**xmake.lua", "src/tp/**xmake.lua")
