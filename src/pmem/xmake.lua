@@ -1,0 +1,21 @@
+add_requires("mimalloc")
+
+option("pmem_debug")
+set_default(false)
+set_showmenu(true)
+set_category("option")
+set_description("Enable debug mode for pmem")
+add_defines("PMEM_DEBUG")
+
+target("pmem")
+set_languages("c99")
+set_kind("static")
+add_files("./normal.c", "./pmem.c")
+add_packages("mimalloc")
+add_options("pmem_debug")
+
+target("pmem_test")
+set_languages("c99")
+add_deps("pmem")
+set_kind("binary")
+add_files("./test.c")

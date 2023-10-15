@@ -1,6 +1,6 @@
 
-#include "obj.h"
-#include "log.h"
+#include "scene/inc/obj.h"
+#include "log/inc/log.h"
 
 static void obj_component_add_mi_malloc(obj_t *obj, component_t *cp) {
 

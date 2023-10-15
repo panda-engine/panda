@@ -1,8 +1,12 @@
 
-
+# BasedOnStyle: LLVM
 BasedOnStyle: LLVM
+# IndentWidth: 4
 IndentWidth: 4
+# UseTab: Never
 AccessModifierOffset: -4
+# case 
+IndentCaseLabels: true
 # AllowShortIfStatementsOnASingleLine: true
 # AlwaysBreakTemplateDeclarations: true
 # AllowShortBlocksOnASingleLine: 'false'

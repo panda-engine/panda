@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "pmalloc.h"
+#include "malloc/inc/pmalloc.h"
 
 #include <stdint.h>
 

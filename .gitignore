@@ -1,8 +1,10 @@
-.vscode
-.cache
-.xmake
-build
+
+.vscode/
+.xmake/
+build/
+
+.DS_Store
 
 src/tp/inc
 
-compile_commands.json
+*.js
