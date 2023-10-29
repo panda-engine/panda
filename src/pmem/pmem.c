@@ -27,7 +27,7 @@ pmem *pmem_new_alloc(size_t size, pmem_t type, void *_ptr) {
     pmem *r = mi_malloc(sizeof(pmem));
     if (type == normal) {
 #ifdef PMEM_DEBUG
-        LOG_F(INFO, "pmem_new_alloc: normal");
+        log_info("pmem_new_alloc");
 #endif
         pmem_new_normal(r);
     } else {
