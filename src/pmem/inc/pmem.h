@@ -5,11 +5,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-// extern void *mi_malloc(size_t size);
-// extern void *mi_realloc(void *p, size_t newsize);
-// extern size_t mi_usable_size(const void *p);
-// extern void mi_free(void *p);
-// extern char *mi_strdup(const char *s);
 
 typedef enum {
     normal,

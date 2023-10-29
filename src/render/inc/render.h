@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-#include "pmalloc.h"
+#include "pmem/inc/pmem.h"
 
 #ifdef __cplusplus
 extern "C" {

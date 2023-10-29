@@ -1,4 +1,5 @@
 
+
 #include "pmem/inc/pmem.h"
 #include <stdio.h>
 
@@ -7,7 +8,7 @@ int main() {
 
     char *str = p->alloc(sizeof(char) * 20, NULL);
     str[0] = '9';
-    str[5] = '\0';
+    str[1] = '\0';
     printf("%s", str);
 
     p->free(str, NULL);

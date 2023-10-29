@@ -1,6 +1,8 @@
 
 #include "scene/inc/obj.h"
-#include "log/inc/log.h"
+#include "log/src/log.h"
+
+#include <mimalloc.h>
 
 static void obj_component_add_mi_malloc(obj_t *obj, component_t *cp) {
 
@@ -11,7 +13,7 @@ static void obj_component_add_mi_malloc(obj_t *obj, component_t *cp) {
             mi_realloc(obj->array, sizeof(component_t) * new_cap);
 
         if (!new_array) {
-            clog_error("apply mem error");
+            log_error("apply mem error");
             return;
         }
 
@@ -143,7 +145,7 @@ void panda_set_component_id(component_t *component, const uint64_t id) {
 void panda_obj_component_add(pmem *pm, obj_t *obj, component_t *cp) {
 
     if (!obj || !cp) {
-        clog_error("obj_component_add: arg is null point!");
+        log_error("obj_component_add: arg is null point!");
         return;
     }
 
@@ -159,7 +161,7 @@ void panda_obj_component_add(pmem *pm, obj_t *obj, component_t *cp) {
             pm->realloc(obj->array, sizeof(component_t) * new_cap, pm->_ptr);
 
         if (!new_array) {
-            clog_error("obj_component_add: apply mem error");
+            log_error("obj_component_add: apply mem error");
             return;
         }
 

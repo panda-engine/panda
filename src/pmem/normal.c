@@ -1,7 +1,8 @@
 
-// #include "log.h"
+#ifdef PMEM_DEBUG
+#include "log/src/log.h"
+#endif
 #include "pmem/inc/pmem.h"
-// #include <loguru.hpp>
 
 #include <mimalloc.h>
 #include <sys/stat.h>
@@ -32,10 +33,9 @@ void pmem_new_normal(pmem *p) {
 
 void pmem_free_normal(pmem *ptr) {
 #ifdef PMEM_DEBUG
-    // LOG_F(INFO, "pmem_free_alloc");
+    log_info("pmem_free_alloc");
 #endif
-    if (!ptr)
-        return;
 
     mi_free(ptr);
+    ptr = NULL;
 }

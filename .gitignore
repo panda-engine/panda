@@ -1,10 +1,11 @@
-
-.vscode/
-.xmake/
-build/
-
-.DS_Store
+.vscode
+.cache
+.xmake
+build
 
 src/tp/inc
 
-*.js
+compile_commands.json
+
+cmake*
+.idea
